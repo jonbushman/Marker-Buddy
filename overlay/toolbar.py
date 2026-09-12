@@ -32,7 +32,18 @@ class Toolbar(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Marker Buddy - Controls")
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        # Qt.Tool puts this window in a higher OS window layer than the
+        # draw surface's plain WindowStaysOnTopHint (which it needs to keep
+        # for OBS Window Capture visibility - see canvas.py). Without this,
+        # both windows share one "always on top" layer and whichever was
+        # clicked most recently wins the top spot; since the draw surface
+        # is full-screen, clicking it to draw would win and permanently
+        # bury Controls underneath with no way to click it again. A
+        # distinct, higher layer means Controls is always reachable
+        # regardless of click order. Tool windows are also hidden from
+        # the taskbar/dock/Alt-Tab, which is fine here since Controls
+        # isn't meant to be an OBS capture target anyway.
+        self.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
         self.setFixedWidth(230)
 
         layout = QVBoxLayout(self)
