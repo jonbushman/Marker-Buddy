@@ -69,8 +69,16 @@ class OverlayCanvas(QWidget):
 
     def set_click_through(self, enabled: bool):
         self._click_through = enabled
-        self.setWindowFlag(Qt.WindowTransparentForInput, enabled)
-        self.show()
+        # WA_TransparentForMouseEvents is a runtime widget attribute, not a
+        # window flag, so it takes effect immediately on the existing native
+        # window. The previous implementation used setWindowFlag(), which
+        # destroys and recreates the native window and requires calling
+        # show() again - that recreation kept re-inserting the full-screen
+        # draw surface above the Controls window (most consistently
+        # reproducible on macOS), permanently burying the toolbar the
+        # first time a stroke was drawn with no way to click it again
+        # short of quitting.
+        self.setAttribute(Qt.WA_TransparentForMouseEvents, enabled)
 
     def is_click_through(self) -> bool:
         return self._click_through

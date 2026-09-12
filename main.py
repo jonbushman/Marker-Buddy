@@ -1,6 +1,5 @@
 import sys
 
-from PySide6.QtCore import QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication
 
@@ -26,15 +25,7 @@ def main():
     toolbar.eraserToggled.connect(canvas.set_erasing)
     toolbar.undoRequested.connect(canvas.undo)
     toolbar.clearRequested.connect(canvas.clear)
-    def on_click_through_toggled(enabled):
-        canvas.set_click_through(enabled)
-        # set_click_through() re-shows the draw surface, which can raise it
-        # above the Controls window; pull Controls back to the front so its
-        # buttons stay clickable.
-        toolbar.raise_()
-        toolbar.activateWindow()
-
-    toolbar.clickThroughToggled.connect(on_click_through_toggled)
+    toolbar.clickThroughToggled.connect(canvas.set_click_through)
     toolbar.quitRequested.connect(app.quit)
     canvas.strokeCountChanged.connect(toolbar.set_stroke_count)
 
@@ -47,18 +38,6 @@ def main():
     canvas.show()
     toolbar.show()
     toolbar.move(40, 40)
-
-    # The draw surface is full-screen and shares the same "always on top"
-    # layer as Controls. While Draw Mode is on, every click used to draw
-    # can itself raise the draw surface above Controls (most noticeable on
-    # macOS), permanently burying the toolbar underneath it with no way to
-    # click it again short of quitting. Periodically pulling Controls back
-    # to the front guards against that without interrupting an in-progress
-    # stroke (the OS keeps routing mouse-move/release for that stroke to
-    # the draw surface regardless of z-order changes elsewhere).
-    keep_toolbar_on_top = QTimer()
-    keep_toolbar_on_top.timeout.connect(toolbar.raise_)
-    keep_toolbar_on_top.start(300)
 
     sys.exit(app.exec())
 
