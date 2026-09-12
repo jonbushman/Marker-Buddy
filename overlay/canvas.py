@@ -23,6 +23,13 @@ class OverlayCanvas(QWidget):
             Qt.FramelessWindowHint
             | Qt.WindowStaysOnTopHint
             | Qt.NoDropShadowWindowHint
+            # Never let the draw surface become the active/key window: it
+            # only needs mouse events, not keyboard focus. Without this, on
+            # macOS re-showing this window (see set_click_through) steals
+            # activation from the Controls window, which then swallows the
+            # next click on the toolbar as a "wake up the window" click
+            # instead of an actual button press.
+            | Qt.WindowDoesNotAcceptFocus
         )
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_NoSystemBackground)

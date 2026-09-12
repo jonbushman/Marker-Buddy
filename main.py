@@ -25,7 +25,15 @@ def main():
     toolbar.eraserToggled.connect(canvas.set_erasing)
     toolbar.undoRequested.connect(canvas.undo)
     toolbar.clearRequested.connect(canvas.clear)
-    toolbar.clickThroughToggled.connect(canvas.set_click_through)
+    def on_click_through_toggled(enabled):
+        canvas.set_click_through(enabled)
+        # set_click_through() re-shows the draw surface, which can raise it
+        # above the Controls window; pull Controls back to the front so its
+        # buttons stay clickable.
+        toolbar.raise_()
+        toolbar.activateWindow()
+
+    toolbar.clickThroughToggled.connect(on_click_through_toggled)
     toolbar.quitRequested.connect(app.quit)
     canvas.strokeCountChanged.connect(toolbar.set_stroke_count)
 
